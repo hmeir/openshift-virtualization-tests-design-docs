@@ -1,5 +1,5 @@
-# openshift-virtualizatio-tests-stps
-This repository is used to manager openshift-virtualization-tests software test plans (STPs) allowing enhanced SIG improvement and collaboration
+# openshift-virtualizatio-tests-design-docs
+This repository is used to manager openshift-virtualization-tests strategy & design docs, such as test plans (STPs) allowing enhanced SIG improvement and collaboration
 
 # Openshift Virtualization Quality Engineering Artifacts and Software Test Planning (STP) Repository
 
@@ -13,20 +13,23 @@ This process is mandatory for formal QE sign-off and feature acceptance, as **au
 
 ## Glossary
 
-| Term | Definition | Citation |
-| :--- | :--- | :--- |
-| **STP** | **Software Test Plan**: Provides the overall roadmap for testing, detailing scope, approach, resources, and schedule. | |
-| **STD** | **Software Test Description**: Provides the specific instructions for executing individual tests. | |
-| **VEP** | **Virtualization Enhancement Proposal**. | |
-| **NFR** | **Non-Functional Requirements**: Aspects of testing covering performance, security, monitoring, usability, etc.. | |
-| **EF** | **Enhancement Freeze**. | |
-| **CF** | **Code Freeze**. | |
+| Term    | Definition                                                                                                            |
+|:--------|:----------------------------------------------------------------------------------------------------------------------|
+| **STP** | **Software Test Plan**: Provides the overall roadmap for testing, detailing scope, approach, resources, and schedule. |
+| **STD** | **Software Test Description**: Provides the specific instructions for executing individual tests.                     |
+| **VEP** | **Virtualization Enhancement Proposal**.                                                                              |
+| **NFR** | **Non-Functional Requirements**: Aspects of testing covering performance, security, monitoring, usability, etc..      |
+| **RF**  | **Requirement Freeze** - Review feature requirements                                                                  |
+| **FF**  | **Feature Freeze** - New features test cases ready & reviewed                                                         |
+| **BO**  | **Blockers Only** - New features tested & regression tests run                                                        |
+| **CF**  | **Code Freeze** - Regression+new tests pass & bug validation is done                                                  |
+| **GA*   | **General Availability** - Feature is available for general use                                                       |
 
 ## Process Flow: VEP to QE Sign-off
 
 The QE process is initiated upon feature definition, usually correlating with an approved VEP.
 
-1.  **Feature Review (Pre-STP)**: The QE owner reviews VEPs (Openshift Virtualization and OCP) and requirements to **understand the value** for RH customers. This stage confirms that requirements are **testable and unambiguous** and that acceptance criteria are clearly defined. Non-functional requirements (NFRs) like Downtime, Connectivity, Performance, Security, Monitoring (metrics/alerts), Portability, and Documentation must be covered.
+1.  **Feature Review (Pre-STP)**: The QE owner reviews VEPs (Openshift Virtualization / OCP) and requirements to **understand the value** for RH customers. This stage confirms that requirements are **testable and unambiguous** and that acceptance criteria are clearly defined. Non-functional requirements (NFRs) like Downtime, Connectivity, Performance, Security, Monitoring (metrics/alerts), Portability, and Documentation must be covered.
 2.  **STP Creation**: The QE owner writes the STP, detailing the scope of testing (functional and non-functional requirements), the overall Test Strategy (including types like Functional, Regression, Upgrade, and Compatibility testing), Test Environment requirements, and Risk Management. The STP must include a clear plan to address risks, including calling out an explicit **list of functionalities that cannot be tested**.
 3.  **STD Creation**: Once the developer begins actual development, the QE owner writes the STD. STDs must create test cases **with the customer's perspective in mind**. Each step in the test case must be a test and **verify one thing**, and each step must include the expected results.
 4.  **Tiering and Automation**: QE works with the Development team to define coverage for **Tier 1 and Tier 2 tests**. Automation is crucial, and tests must be running as part of one of the **release checklist jobs**.
