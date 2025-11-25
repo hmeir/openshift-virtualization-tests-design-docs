@@ -62,13 +62,11 @@ Briefly describe what will be tested. The scope must **cover functional and non-
 
 #### **2. Testing Goals**
 
-Define specific, measurable testing objectives for this feature:
+Define specific, measurable testing objectives for this feature, such as:
 
 - [ ] [Goal 1: e.g., Achieve 90% feature coverage for core functionality]
 - [ ] [Goal 2: e.g., Validate all user workflows end-to-end]
-- [ ] [Goal 3: e.g., Ensure performance meets defined SLAs]
-- [ ] [Goal 4: e.g., Verify backward compatibility with version X]
-- [ ] [Goal 5: e.g., Confirm security requirements are met]
+- [ ] [Goal 3: e.g., Verify backward compatibility with version X]
 
 #### **3. Non-Goals (Testing Scope Exclusions)**
 
@@ -79,10 +77,8 @@ Explicitly document what is **out of scope** for testing. **Critical:** All non-
 | Non-Goal                                                             | Rationale              | PM/ Lead Agreement |
 |:---------------------------------------------------------------------|:-----------------------|:-------------------|
 | [e.g., Testing of deprecated features]                               | [Why this is excluded] | [ ] Name/Date      |
-| [e.g., Performance testing beyond defined load limits]               | [Why this is excluded] | [ ] Name/Date      |
-| [e.g., UI testing in unsupported browsers]                           | [Why this is excluded] | [ ] Name/Date      |
-| [e.g., Testing on ARM64 architecture]                                | [Why this is excluded] | [ ] Name/Date      |
-| [e.g., Testing of third-party integrations not officially supported] | [Why this is excluded] | [ ] Name/Date      |
+| [e.g., Performance testing]                                          | [Why this is excluded] | [ ] Name/Date      |
+| [e.g., Testing on XXX architecture]                                  | [Why this is excluded] | [ ] Name/Date      |
 
 **Important Notes:**
 - Non-goals without stakeholder agreement are considered **risks** and must be escalated (see Section II.7 - Risks and Limitations)
@@ -121,22 +117,20 @@ The following types of testing must be reviewed and addressed.
 
 #### **5. Test Environment**
 
-| Environment Component                         | Value | Specification Examples                                                                |
-|:----------------------------------------------|:------|:--------------------------------------------------------------------------------------|
-| **Cluster Topology**                          |       | [e.g., 3-master/3-worker bare-metal, SNO, Compact Cluster, HCP]                       |
-| **OCP & OpenShift Virtualization Version(s)** |       | [e.g., OCP 4.20 with OpenShift Virtualization 4.20]                                   |
-| **CPU Virtualization**                        |       | [e.g., Nodes with VT-x (Intel) or AMD-V (AMD) enabled in BIOS]                        |
-| **Compute Resources**                         |       | [e.g., Minimum per worker node: 8 vCPUs, 32GB RAM]                                    |
-| **Special Hardware**                          |       | [e.g., Specific NICs for SR-IOV, GPU etc]                                             |
-| **Storage (Disk)**                            |       | [e.g., Minimum 500GB per node]                                                        |
-| **Storage Class**                             |       | [e.g., ocs-storagecluster-ceph-rbd-virtualization, specific CSI driver like Ceph-RBD] |
-| **CNI (Container Network)**                   |       | [e.g., OVN-Kubernetes (default), OpenShift-SDN]                                       |
-| **Secondary Networks**                        |       | [e.g., Required NetworkAttachmentDefinitions (NADs) for SR-IOV, bridge, macvlan]      |
-| **Network Plugins**                           |       | [e.g., Multus CNI for secondary networks]                                             |
-| **Network Features**                          |       | [e.g., IPv4, IPv6, dual-stack]                                                        |
-| **Required Operators**                        |       | [e.g., NMState Operator]                                                              |
-| **Platform**                                  |       | [e.g., Bare metal, AWS, Azure, GCP etc]                                               |
-| **Special Configurations**                    |       | [e.g., Disconnected/air-gapped cluster, Proxy environment, FIPS mode enabled]         |
+**Note:** "N/A" means explicitly not applicable. Cannot leave empty cells.
+
+| Environment Component                         | Configuration | Specification Examples                                                                        |
+|:----------------------------------------------|:--------------|:----------------------------------------------------------------------------------------------|
+| **Cluster Topology**                          |               | [e.g., 3-master/3-worker bare-metal, SNO, Compact Cluster, HCP]                               |
+| **OCP & OpenShift Virtualization Version(s)** |               | [e.g., OCP 4.20 with OpenShift Virtualization 4.20]                                           |
+| **CPU Virtualization**                        |               | [e.g., Nodes with VT-x (Intel) or AMD-V (AMD) enabled in BIOS]                                |
+| **Compute Resources**                         |               | [e.g., Minimum per worker node: 8 vCPUs, 32GB RAM]                                            |
+| **Special Hardware**                          |               | [e.g., Specific NICs for SR-IOV, GPU etc]                                                     |
+| **Storage**                                   |               | [e.g., Minimum 500GB per node, specific StorageClass(es)]                                     |
+| **Network**                                   |               | [e.g., OVN-Kubernetes (default), Secondary Networks, Network Plugins, IPv4, IPv6, dual-stack] |
+| **Required Operators**                        |               | [e.g., NMState Operator]                                                                      |
+| **Platform**                                  |               | [e.g., Bare metal, AWS, Azure, GCP etc]                                                       |
+| **Special Configurations**                    |               | [e.g., Disconnected/air-gapped cluster, Proxy environment, FIPS mode enabled]                 |
 
 #### **5.5. Testing Tools & Frameworks**
 
@@ -156,22 +150,10 @@ Document any **new or additional** testing tools, frameworks, or infrastructure 
 
 The following conditions must be met before testing can begin:
 
-- [ ] Requirements and design documents are **approved and stable**
+- [ ] Requirements and design documents are **approved and merged**
 - [ ] Test environment is **set up and configured** (see Section II.5 - Test Environment)
 - [ ] Test cases are **reviewed and approved**
 - [ ] [Add feature-specific entry criteria as needed]
-
-##### **B. Exit Criteria**
-
-The following conditions must be met for testing to be considered complete:
-
-- [ ] All **P0/P1 defects are resolved and verified**
-- [ ] **Test coverage goals are achieved** (see Section II.2 - Testing Goals)
-- [ ] **Test automation merged** (required for GA sign-off)
-- [ ] All planned test cycles are completed
-- [ ] Test summary report is approved
-- [ ] Acceptance criteria are met
-- [ ] [Add feature-specific exit criteria as needed]
 
 #### **7. Risks and Limitations**
 
@@ -195,15 +177,10 @@ Document any known limitations, constraints, or trade-offs in the feature implem
 
 **Examples:**
 - Feature does not support IPv6 (only IPv4)
-- Maximum 100 concurrent operations supported
-- Requires manual cleanup of resources after testing
-- Performance degradation expected with >1000 VMs
 - No support for ARM64 architecture in this release
 
-**Limitations for this feature:**
 - [List limitation 1]
-- [List limitation 2]
-- [List limitation 3]
+...
 
 ---
 
@@ -217,26 +194,14 @@ Map each requirement to its test coverage to verify complete coverage.
 
 | Requirement ID    | Requirement Summary   | Test Scenario(s)                                           | Test Type(s)                | Priority |
 |:------------------|:----------------------|:-----------------------------------------------------------|:----------------------------|:---------|
-| [Jira-123]        | As a user...          | Verify VM can be created with new feature X                | Functional, UI              | P1       |
-| [Jira-124]        | As an admin...        | Verify API for feature X is backward compatible            | API, Backward Compatibility | P1       |
+| [Jira-123]        | As a user...          | Verify VM can be created with new feature X                | Functional, UI              | P0       |
+| [Jira-124]        | As an admin...        | Verify API for feature X is backward compatible            | API, Backward Compatibility | P0       |
 | [Jira-125]        | NFR-2 (Security)      | Verify feature X follows RBAC permissions model            | Security, Functional        | P1       |
-| [Jira-126]        | As a cluster admin... | Verify upgrade from version X to Y preserves feature state | Upgrade, Backward Compat.   | P1       |
+| [Jira-126]        | As a cluster admin... | Verify upgrade from version X to Y preserves feature state | Upgrade, Backward Compat.   | P2       |
 
 ---
 
 ### **IV. Sign-off and Approval**
-
-#### **1. Final Sign-off Checklist**
-
-| Requirement                        | Status | Notes                                                             |
-|:-----------------------------------|:-------|:------------------------------------------------------------------|
-| **Tier 1 / Tier 2 Tests Defined**  | [ ]    | Reviewed and worked with Dev on what will be covered in T1 and T2 |
-| **Automation Merged**              | [ ]    | **Automation must be merged for GA sign-off**                     |
-| **Tests in Release Checklist Job** | [ ]    | Tests are running as part of the release checklist jobs           |
-| **Documentation Reviewed**         | [ ]    | Reviewed the feature documentation                                |
-| **Feature Sign-off**               | [ ]    | QE officially signs off the feature                               |
-
-#### **2. Approval**
 
 This Software Test Plan requires approval from the following stakeholders:
 
