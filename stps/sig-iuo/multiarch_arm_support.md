@@ -129,6 +129,7 @@ New functional flows specific to heterogeneous multi-arch clusters:
 - **[P1]** Verify an alert fires when a golden image is missing an architecture annotation.
 - **[P1]** Verify an alert fires when golden images support is disabled.
 - **[P1]** Verify no alert fires when nodePlacement restricts to a single architecture.
+- **[P2]** Verify only base boot sources exists when disabling golden images support.
 
 **Regression Goals**
 
@@ -228,9 +229,9 @@ No verification activities will be performed for these items, and any related is
 
 The following conditions must be met before testing can begin:
 
-- Requirements and design documents are **approved and merged**
-- Test environment (MultiArch cluster) can be **set up and configured**
-- Multi-CPU architecture support enabled in openshift-virtualization-tests repo
+- [ ] Requirements and design documents are **approved and merged**
+- [X] Test environment (MultiArch cluster) can be **set up and configured** (see Section II.3 - Test Environment)
+- [X] Multi-CPU architecture support enabled in openshift-virtualization-tests repo
 
 #### **5. Risks**
 
@@ -242,16 +243,15 @@ The following conditions must be met before testing can begin:
 
 **Test Coverage**
 
-- **Risk:** OS coverage on ARM64 is narrower than AMD64; sig-network and sig-storage teams must identify ARM-relevant tests and mark them for heterogeneous cluster execution.
+- **Risk:** OS coverage on ARM64 is narrower than AMD64; sig-storage team must identify ARM-relevant tests and mark them for heterogeneous cluster execution.
   - **Mitigation:**
     - **sig-storage:** Please specify which storage tests are ARM-relevant, how they will be marked for heterogeneous cluster execution, and the expected timeline for completion.
-    - **sig-network:** Please specify which network tests are ARM-relevant, how they will be marked for heterogeneous cluster execution, and the expected timeline for completion.
-  - *Areas with reduced coverage:* sig-network, sig-storage
+  - *Areas with reduced coverage:* sig-storage
 
 **Test Environment**
 
-- **Risk:** 12-hour ARM64 cluster availability window limits test execution time.
-  - **Mitigation:** DEVOPS adding option to extend cluster lifetime [CNV-83491](https://redhat.atlassian.net/browse/CNV-83491).
+- **Risk:** Multiarch cluster availability window limits test execution time.
+  - **Mitigation:** DEVOPS added option to extend cluster lifetime to 2 days. [CNV-83491](https://redhat.atlassian.net/browse/CNV-83491).
   - *Missing resources or infrastructure:* Longer cluster availability for full regression runs.
 
 **Untestable Aspects**
@@ -297,21 +297,17 @@ This section centralizes test scenarios for all participating SIGs. Each SIG's s
 - **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want no alerting when restricting workloads placement to one architecture.
   - *Test Scenario:* [Tier 2] Disable golden images support, set nodePlacement to a single architecture, and verify no misconfiguration alert fires
   - *Priority:* P1
+- **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want only base boot sources when disabling golden images support
+  - *Test Scenario:* [Tier 2] Disable golden images support, Verify only base boot sources exists.
+  - *Priority:* P2
 
 #### sig-infra — New Functional Tests
 
-- **[CNV-76714](https://redhat.atlassian.net/browse/CNV-76714)** — As a VM creator, I want to deploy vms from all golden images with multiarch support.
-  - *Test Scenario:* [Tier 2] Create VMs from all available boot sources on their target node.
-  - *Priority:* P0
 - **[CNV-76714](https://redhat.atlassian.net/browse/CNV-76714)** — As a VM creator I want to deploy VMs on a specific architecture when golden images support is disabled
   - *Test Scenario:* [Tier 2] Disable golden images support, restrict nodePlacement to a specific architecture, and verify VMs can be created on nodes of that architecture from available boot sources
   - *Priority:* P0
 
 #### sig-storage — New Functional Tests
-
-- **[CNV-76732](https://redhat.atlassian.net/browse/CNV-76732)** — As a cluster admin, I want golden images imported for the correct architecture
-  - *Test Scenario:* [Tier 2] Verify golden image import pulls the correct architecture-specific image and boot sources become available
-  - *Priority:* P0
 - **[CNV-76732](https://redhat.atlassian.net/browse/CNV-76732)** — As a cluster admin, I want cross-architecture VM cloning to be blocked
   - *Test Scenario:* [Tier 2] Attempt to clone a VM to a node of a different architecture and verify the operation is blocked with a clear, user-facing error message
   - *Priority:* P0
@@ -334,16 +330,11 @@ This section centralizes test scenarios for all participating SIGs. Each SIG's s
 
 - **Reviewers:**
   - QE Members (sig-iuo): @OhadRevah @rlobillo @albarker-rh
-  - Dev Members (sig-iuo): @orenc1
   - QE Members (sig-network): @yossisegev @Anatw @EdDev @servolkov @azhivovk
-  - Dev Members (sig-network):
-  - QE Members (sig-storage): @duyanyan @jpeimer @josemacassan @kgoldbla @dalia-frank @Ahmad-Hafe @kshvaika @ema-aka-young @acinko-rh
-  - Dev Members (sig-storage):
+  - QE Members (sig-storage): @jpeimer @josemacassan @kgoldbla @dalia-frank @Ahmad-Hafe @kshvaika @ema-aka-young @acinko-rh
   - QE Members (sig-virt): @dshchedr @vsibirsk @kbidarkar @SiboWang1997 @akri3i @jerry7z @SamAlber
-  - Dev Members (sig-virt):
   - QE Members (sig-infra): @geetikakay @RoniKishner
-  - Dev Members (sig-infra):
 - **Approvers:**
-  - QE Architect: [Ruth Netser](@rnetser)
+  - QE Architect: [Ruth Netser] (@rnetser)
   - Principal Developer (sig-iuo): @nunnatsa
   - Product Manager: [Martin Tessun] @mtessun
