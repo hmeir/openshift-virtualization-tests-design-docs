@@ -120,9 +120,7 @@ This STP serves as the **overall roadmap for testing**, detailing the scope, app
 New functional flows specific to heterogeneous multi-arch clusters:
 
 - **[P0]** Verify that VMs can be created on ARM and AMD node from every available boot source.
-- **[P0]** Verify cross-architecture VM cloning is blocked with a clear, user-facing error message.
 - **[P0]** Verify network connectivity between VMs running on different architectures.
-- **[P0]** Verify golden image import pulls the correct architecture-specific image.
 - **[P0]** Verify VMs survive upgrade on their correct architecture nodes and arch-specific resources are preserved.
 - **[P0]** Verify VMs can be deployed on a specific architecture when golden images support is disabled, using nodePlacement to target the desired architecture.
 - **[P1]** Verify an alert fires when a golden image is annotated only with unsupported architectures.
@@ -165,6 +163,8 @@ No verification activities will be performed for these items, and any related is
   - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
 - SR-IOV, Multi-NIC, and GPU passthrough cannot be validated on AWS.
   - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
+- Cross Cluster Live Migration (CCLM) is not tested on multi-arch clusters.
+  - *Sign-off:* [ ]
 
 #### **2. Test Strategy**
 
@@ -213,7 +213,7 @@ No verification activities will be performed for these items, and any related is
 - **CPU Virtualization:** MultiArch cluster (3 amd64 control-plane, 2 amd64 workers, 2 arm64 workers). AMD64 workers use hardware virtualization (VT-x), ARM64 Graviton workers use ARM virtualization extensions.
 - **Compute Resources:** Minimum per worker node: 16 vCPUs, 32GB RAM
 - **Special Hardware:** N/A
-- **Storage:** io2-csi storage class (AWS EBS io2 CSI driver)
+- **Storage:** io2-csi,ocs
 - **Network:** OVN-Kubernetes (default), IPv4
 - **Required Operators:** N/A
 - **Platform:** AWS (Graviton instances for ARM64 workers)
@@ -250,6 +250,8 @@ The following conditions must be met before testing can begin:
 
 **Test Environment**
 
+- **Risk:** Only 2 worker nodes per architecture — during upgrades, all VMs of a given arch are concentrated on a single node, risking resource pressure.
+  - **Mitigation:** Limit the number of VMs in upgrade tests to fit within single-node capacity.
 - **Risk:** Multiarch cluster availability window limits test execution time.
   - **Mitigation:** DEVOPS added option to extend cluster lifetime to 2 days. [CNV-83491](https://redhat.atlassian.net/browse/CNV-83491).
   - *Missing resources or infrastructure:* Longer cluster availability for full regression runs.
@@ -303,25 +305,23 @@ This section centralizes test scenarios for all participating SIGs. Each SIG's s
 
 #### sig-infra — New Functional Tests
 
-- **[CNV-76714](https://redhat.atlassian.net/browse/CNV-76714)** — As a VM creator I want to deploy VMs on a specific architecture when golden images support is disabled
-  - *Test Scenario:* [Tier 2] Disable golden images support, restrict nodePlacement to a specific architecture, and verify VMs can be created on nodes of that architecture from available boot sources
-  - *Priority:* P0
+None
 
 #### sig-storage — New Functional Tests
-- **[CNV-76732](https://redhat.atlassian.net/browse/CNV-76732)** — As a cluster admin, I want cross-architecture VM cloning to be blocked
-  - *Test Scenario:* [Tier 2] Attempt to clone a VM to a node of a different architecture and verify the operation is blocked with a clear, user-facing error message
-  - *Priority:* P0
+
+None
 
 #### sig-virt — New Functional Tests
 
-- **[CNV-26818](https://redhat.atlassian.net/browse/CNV-26818)** — As a cluster admin, I want VMs to survive upgrade on their correct architecture nodes
-  - *Test Scenario:* [Tier 2] Verify VMs on both architectures survive upgrade and arch-specific resources are preserved
-  - *Priority:* P0
+None
 
 #### sig-network — New Functional Tests
 
-- **[CNV-76741](https://redhat.atlassian.net/browse/CNV-76741)** — As a VM admin, I want VMs on different architectures to communicate with each other
-  - *Test Scenario:* [Tier 2] Verify network connectivity between an ARM64 VM and an AMD64 VM
+- **[CNV-76741](https://redhat.atlassian.net/browse/CNV-76741)** — As a VM admin, I want VMs on different architectures to communicate with each other via UDN (primary interface)
+  - *Test Scenario:* [Tier 2] Verify network connectivity between an ARM64 VM and an AMD64 VM using UDN as the primary network interface
+  - *Priority:* P0
+- **[CNV-76741](https://redhat.atlassian.net/browse/CNV-76741)** — As a VM admin, I want VMs on different architectures to communicate with each other via primary masquerade networking
+  - *Test Scenario:* [Tier 2] Verify network connectivity between an ARM64 VM and an AMD64 VM using primary masquerade networking
   - *Priority:* P0
 
 ---
@@ -329,11 +329,11 @@ This section centralizes test scenarios for all participating SIGs. Each SIG's s
 ### **IV. Sign-off and Approval**
 
 - **Reviewers:**
-  - QE Members (sig-iuo): @OhadRevah @rlobillo @albarker-rh
-  - QE Members (sig-network): @yossisegev @Anatw @EdDev @servolkov @azhivovk
-  - QE Members (sig-storage): @jpeimer @josemacassan @kgoldbla @dalia-frank @Ahmad-Hafe @kshvaika @ema-aka-young @acinko-rh
-  - QE Members (sig-virt): @dshchedr @vsibirsk @kbidarkar @SiboWang1997 @akri3i @jerry7z @SamAlber
-  - QE Members (sig-infra): @geetikakay @RoniKishner
+  - QE Member (sig-iuo): @OhadRevah
+  - sig-network: @yossisegev
+  - sig-storage: @jpeimer
+  - sig-virt:  @vsibirsk @akri3i
+  - sig-infra: @geetikakay
 - **Approvers:**
   - QE Architect: [Ruth Netser] (@rnetser)
   - Principal Developer (sig-iuo): @nunnatsa
