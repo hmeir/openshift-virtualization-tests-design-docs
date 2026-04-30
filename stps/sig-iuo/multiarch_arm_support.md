@@ -13,6 +13,10 @@
   - [CNV-76732](https://redhat.atlassian.net/browse/CNV-76732) — Storage Multi-arch support
   - [CNV-76741](https://redhat.atlassian.net/browse/CNV-76741) — Network Multi-arch support
   - [CNV-61832](https://redhat.atlassian.net/browse/CNV-61832) — UI Multi-arch support
+- **Feature Maturity:**
+  - DP: N/A
+  - TP: 4.21
+  - GA: 4.22
 - **QE Owner(s):** Harel Meir (@hmeir)
 - **Owning SIG:** sig-iuo
 - **Participating SIGs:** sig-virt, sig-infra, sig-storage, sig-network
@@ -27,6 +31,7 @@
 
 Multi-architecture support enables OpenShift Virtualization to operate on heterogeneous clusters with mixed AMD64 and ARM64 worker nodes.
 This feature targets customers adopting ARM-based infrastructure alongside existing AMD64 deployments.
+This STP covers the Tech Preview phase in 4.21/4.22, where multi-arch support is opt-in via feature gate. The feature gate is expected to be enabled by default in 4.23+.
 
 ---
 
@@ -37,28 +42,29 @@ technology, and testability before formal test planning.
 
 #### **1. Requirement & User Story Review Checklist**
 
-- **Review Requirements**
+- [x] **Review Requirements**
   - *List the key D/S requirements reviewed:*
     - Architecture-aware VM scheduling; users can select a VM's target architecture.
     - All VM-related operations (lifecycle, migration, networking, storage) are supported on both architectures.
     - Workload observability across architectures.
     - Existing VMs and workloads continue to be fully functional without regression.
-- **Understand Value and Customer Use Cases**
+- [x] **Understand Value and Customer Use Cases**
   - *Describe the feature's value to customers:*
     - Customers can run ARM64 and AMD64 VMs in a single cluster, reducing operational overhead and enabling gradual ARM adoption.
   - *List the customer use cases identified:*
     - As a VM admin, I want to deploy VMs on ARM64 nodes from available boot sources after ARM64 nodes are added to the cluster.
-- **Testability**
+- [x] **Testability**
   - *Note any requirements that are unclear or untestable:*
     - All requirements are testable on a heterogeneous AWS cluster.
-- **Acceptance Criteria**
+- [x] **Acceptance Criteria**
   - *List the acceptance criteria:*
     - VM lifecycle operations are consistent with single-architecture cluster behavior on their matching CPU architecture.
     - VMs communicate regardless of the CPU architecture of their host nodes.
     - Architecture-specific golden images are provisioned for each supported architecture, and VMs can be created on matching nodes.
     - VM scheduling respects nodePlacement constraints, allowing users to target a specific supported architecture.
+    - VMs survive cluster upgrade on their correct architecture nodes; arch-specific resources are preserved.
   - *Note any gaps or missing criteria:* None
-- **Non-Functional Requirements (NFRs)**
+- [x] **Non-Functional Requirements (NFRs)**
   - *List applicable NFRs and their targets:*
     - **Monitoring**: Platform must alert users about MultiArch misconfigurations, workload metrics across both architectures on multiarch cluster.
     - **Upgrade**: VMs survive upgrade on their correct architecture nodes. Arch-specific resources are preserved.
@@ -86,25 +92,25 @@ The following are confirmed product constraints accepted before testing begins.
 
 #### **3. Technology and Design Review**
 
-- **Developer Handoff/QE Kickoff**
+- [x] **Developer Handoff/QE Kickoff**
   - *Key takeaways and concerns:*
     - Cross-SIG kickoff conducted with all 5 participating SIGs
     - Each SIG confirmed ownership of their multi-arch test scope
-- **Technology Challenges**
+- [x] **Technology Challenges**
   - *List identified challenges:*
     - Heterogeneous cluster provisioning requires AWS with Graviton instances
     - CPU model configuration per architecture needs validation
   - *Impact on testing approach:*
     - Tests are limited to AWS platform
-- **API Extensions**
+- [x] **API Extensions**
   - *List new or modified APIs:*
     - `vm.spec.template.spec.architecture` (string) — targets VM to specific CPU architecture
     - Golden images support enable/disable
   - *Testing impact:*
     - Golden images support must be tested.
-- **Test Environment Needs**
+- [x] **Test Environment Needs**
   - *See environment requirements in Section II.3 and testing tools in Section II.3.1*
-- **Topology Considerations**
+- [x] **Topology Considerations**
   - *Describe topology requirements:* Feature targets MultiArch clusters only (3 amd64 control-plane, 2 amd64 workers, 2 arm64 workers)
   - *Impact on test design:* Live migration and upgrade tests require at least 2 nodes of the same architecture.
   - *Topologies not tested:* Golden images support is auto-disabled on Single Node OpenShift (SNO) clusters, even if the feature gate is enabled.
@@ -120,9 +126,8 @@ This STP serves as the **overall roadmap for testing**, detailing the scope, app
 New functional flows specific to heterogeneous multi-arch clusters:
 
 - **[P0]** Verify that VMs can be created on ARM and AMD node from every available boot source.
-- **[P0]** Verify network connectivity between VMs running on different architectures.
-- **[P0]** Verify VMs survive upgrade on their correct architecture nodes and arch-specific resources are preserved.
-- **[P0]** Verify VMs can be deployed on a specific architecture when golden images support is disabled, using nodePlacement to target the desired architecture.
+- **[P0]** Verify UDN connectivity between VMs running on ARM64 and AMD64 nodes.
+- **[P0]** Verify ClusterIP/masquerade connectivity between VMs running on ARM64 and AMD64 nodes.
 - **[P1]** Verify an alert fires when a golden image is annotated only with unsupported architectures.
 - **[P1]** Verify an alert fires when a golden image is missing an architecture annotation.
 - **[P1]** Verify an alert fires when golden images support is disabled.
@@ -152,6 +157,9 @@ No verification activities will be performed for these items, and any related is
 - **Architecture-specific resource cleanup after node removal**
   - *Rationale:* Removing all nodes of a given architecture and verifying automatic cleanup of related boot sources and templates is time-consuming to test, and customers can perform manual cleanup if needed.
   - *PM/Lead Agreement:* Martin Tessun (@mtessun) / 2026-04-15
+- **Cross Cluster Live Migration (CCLM) on multi-arch clusters**
+  - *Rationale:* CCLM on heterogeneous clusters is not in scope for this release.
+  - *PM/Lead Agreement:* Martin Tessun (@mtessun) / 2026-04-15
 
 **Test Limitations**
 
@@ -163,9 +171,6 @@ No verification activities will be performed for these items, and any related is
   - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
 - SR-IOV, Multi-NIC, and GPU passthrough cannot be validated on AWS.
   - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
-- Cross Cluster Live Migration (CCLM) is not tested on multi-arch clusters.
-  - *Sign-off:* [ ]
-
 #### **2. Test Strategy**
 
 **Functional**
@@ -182,11 +187,11 @@ No verification activities will be performed for these items, and any related is
 - **Performance Testing** — Validates feature performance meets requirements
   - *Details:* Out of scope for initial release. Planned for the future. [CNV-63088](https://redhat.atlassian.net/browse/CNV-63088)
 - **Scale Testing** — Validates feature behavior under increased load
-  - *Details:* Out of scope.
+  - *Details:* Deferred — heterogeneous cluster scale limits not yet defined. Planned for a future cycle alongside performance testing.
 - **Security Testing** — Verifies security requirements, RBAC, authentication, authorization
   - *Details:* N/A — No security-specific requirements for this feature.
 - **Usability Testing** — Validates user experience and accessibility requirements
-  - *Details:* UI work was completed under [CNV-61832](https://redhat.atlassian.net/browse/CNV-61832). UI testing is owned by the UI team.
+  - *Details:* UI testing is owned by the UI QE team under [CNV-61832](https://redhat.atlassian.net/browse/CNV-61832).
 - **Monitoring** — Does the feature require metrics and/or alerts?
   - *Details:* Alerts and metrics for multiarch misconfigurations.
 
@@ -229,7 +234,7 @@ No verification activities will be performed for these items, and any related is
 
 The following conditions must be met before testing can begin:
 
-- [ ] Requirements and design documents are **approved and merged**
+- [] Requirements and design documents are **approved and merged**
 - [X] Test environment (MultiArch cluster) can be **set up and configured** (see Section II.3 - Test Environment)
 - [X] Multi-CPU architecture support enabled in openshift-virtualization-tests repo
 
@@ -240,42 +245,40 @@ The following conditions must be met before testing can begin:
 - **Risk:** Cross-SIG coordination across 5 SIGs may delay test completion. Regional instability may affect team availability and velocity.
   - **Mitigation:** Establish clear ownership per SIG early; track in Jira.
   - *Estimated impact on schedule:* Small risk, marked as Yellow.
-
-**Test Coverage**
-
-- **Risk:** OS coverage on ARM64 is narrower than AMD64; sig-storage team must identify ARM-relevant tests and mark them for heterogeneous cluster execution.
-  - **Mitigation:**
-    - **sig-storage:** Please specify which storage tests are ARM-relevant, how they will be marked for heterogeneous cluster execution, and the expected timeline for completion.
-  - *Areas with reduced coverage:* sig-storage
+  - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
 
 **Test Environment**
 
 - **Risk:** Only 2 worker nodes per architecture — during upgrades, all VMs of a given arch are concentrated on a single node, risking resource pressure.
   - **Mitigation:** Limit the number of VMs in upgrade tests to fit within single-node capacity.
+  - *Missing resources or infrastructure:* Additional worker nodes per architecture for upgrade testing.
+  - *Sign-off:*
 - **Risk:** Multiarch cluster availability window limits test execution time.
   - **Mitigation:** DEVOPS added option to extend cluster lifetime to 2 days. [CNV-83491](https://redhat.atlassian.net/browse/CNV-83491).
   - *Missing resources or infrastructure:* Longer cluster availability for full regression runs.
+  - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
 
 **Untestable Aspects**
 
 - **Risk:** SR-IOV, Multi-NIC, and GPU passthrough cannot be validated on AWS platform
   - **Mitigation:** Validated on x86 nodes only; ARM coverage deferred until bare-metal ARM test environment is available
+  - *Alternative validation approach:* Rely on x86-only validation; revisit when bare-metal ARM environment becomes available.
+  - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
 - **Risk:** Upgrade path from FG-disabled to FG-enabled-by-default is not testable in 4.22 (FG will be enabled by default not earlier than 4.23)
   - **Mitigation:** Full upgrade path testing deferred to 4.23
+  - *Alternative validation approach:* Validate FG-enabled path in 4.22; full FG-disabled-to-enabled upgrade path deferred to 4.23.
+  - *Sign-off:
+
+**Resource Constraints**
+
+- **Mitigation:** No resource constraints identified — all SIGs have allocated QE capacity for this feature.
 
 **Dependencies**
 
 - **Risk:** Multi-CPU architecture support PR in openshift-virtualization-tests ([#3147](https://github.com/RedHatQE/openshift-virtualization-tests/pull/3147)) was merged without thorough review by all participating SIGs; additional changes may be required
   - **Mitigation:** Track follow-up review feedback from each SIG and address required changes promptly
   - *Dependent teams or components:* sig-virt, sig-infra, sig-storage, sig-network
-
-**Others**
-
-- **Risk:** Known non-blocker bugs may impact test results:
-  1. [[UI] architecture is incorrect for fedora arm and inconsistent on UI for other os](https://redhat.atlassian.net/browse/CNV-68981)
-  2. [[Storage] Arch-specific DataSources (arm64) persist after removing arm64 nodes](https://redhat.atlassian.net/browse/CNV-68996)
-  - **Mitigation:** Make sure they are fixed & verified before GA
-
+  - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-15
 ---
 
 ### **III. Test Scenarios & Traceability**
