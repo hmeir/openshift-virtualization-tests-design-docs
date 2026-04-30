@@ -5,7 +5,7 @@
 ### **Metadata & Tracking**
 
 - **Enhancement(s):** [VEP: Heterogeneous Cluster Support](https://github.com/kubevirt/enhancements/tree/main/veps/sig-storage/dic-on-heterogeneous-cluster)
-- **Feature Tracking:** [VIRTSTRAT-494 - Golden images support enablement for ARM](https://redhat.atlassian.net/browse/VIRTSTRAT-494)
+- **Feature Tracking:** [VIRTSTRAT-494 -  MultiArch Support enablement for ARM](https://redhat.atlassian.net/browse/VIRTSTRAT-494)
 - **Epic Tracking:**
   - [CNV-67900](https://redhat.atlassian.net/browse/CNV-67900) — HCO Multi-arch support
   - [CNV-26818](https://redhat.atlassian.net/browse/CNV-26818) — Virt Multi-arch worker node support
@@ -25,7 +25,7 @@
 
 - **Multi-Arch:** Multi-Architecture, heterogeneous clusters with mixed CPU architectures (AMD64 + ARM64).
 - **Golden image**: pre-configured VM image that is automatically imported into a boot source
-- **Golden images support** - Golden images multiarch support allows to deploy architecture-specific VMs from dedicated boot sources.
+- **Multiarch golden images support** - Allows deploying architecture-specific VMs from dedicated boot sources.
 
 ### **Feature Overview**
 
@@ -105,15 +105,15 @@ The following are confirmed product constraints accepted before testing begins.
 - [x] **API Extensions**
   - *List new or modified APIs:*
     - `vm.spec.template.spec.architecture` (string) — targets VM to specific CPU architecture
-    - Golden images support enable/disable
+    - Multiarch golden images support enable/disable
   - *Testing impact:*
-    - Golden images support must be tested.
+    - Multiarch golden images support must be tested.
 - [x] **Test Environment Needs**
   - *See environment requirements in Section II.3 and testing tools in Section II.3.1*
 - [x] **Topology Considerations**
   - *Describe topology requirements:* Feature targets MultiArch clusters only (3 amd64 control-plane, 2 amd64 workers, 2 arm64 workers)
   - *Impact on test design:* Live migration and upgrade tests require at least 2 nodes of the same architecture.
-  - *Topologies not tested:* Golden images support is auto-disabled on Single Node OpenShift (SNO) clusters, even if the feature gate is enabled.
+  - *Topologies not tested:* Multiarch golden images support is auto-disabled on Single Node OpenShift (SNO) clusters, even if the feature gate is enabled.
 
 ### **II. Software Test Plan (STP)**
 
@@ -130,9 +130,9 @@ New functional flows specific to heterogeneous multi-arch clusters:
 - **[P0]** Verify ClusterIP/masquerade connectivity between VMs running on ARM64 and AMD64 nodes.
 - **[P1]** Verify an alert fires when a golden image is annotated only with unsupported architectures.
 - **[P1]** Verify an alert fires when a golden image is missing an architecture annotation.
-- **[P1]** Verify an alert fires when golden images support is disabled.
+- **[P1]** Verify an alert fires when multiarch golden images support is disabled.
 - **[P1]** Verify no alert fires when nodePlacement restricts to a single architecture.
-- **[P2]** Verify only base boot sources exists when disabling golden images support.
+- **[P2]** Verify only base boot sources exists when disabling multiarch golden images support.
 
 **Regression Goals**
 
@@ -250,9 +250,9 @@ The following conditions must be met before testing can begin:
 **Test Environment**
 
 - **Risk:** Only 2 worker nodes per architecture — during upgrades, all VMs of a given arch are concentrated on a single node, risking resource pressure.
-  - **Mitigation:** Limit the number of VMs in upgrade tests to fit within single-node capacity.
+  - **Mitigation:** Split the upgrade VMS between the architectures, or add aditional worker node.
   - *Missing resources or infrastructure:* Additional worker nodes per architecture for upgrade testing.
-  - *Sign-off:*
+  - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-30
 - **Risk:** Multiarch cluster availability window limits test execution time.
   - **Mitigation:** DEVOPS added option to extend cluster lifetime to 2 days. [CNV-83491](https://redhat.atlassian.net/browse/CNV-83491).
   - *Missing resources or infrastructure:* Longer cluster availability for full regression runs.
@@ -267,7 +267,7 @@ The following conditions must be met before testing can begin:
 - **Risk:** Upgrade path from FG-disabled to FG-enabled-by-default is not testable in 4.22 (FG will be enabled by default not earlier than 4.23)
   - **Mitigation:** Full upgrade path testing deferred to 4.23
   - *Alternative validation approach:* Validate FG-enabled path in 4.22; full FG-disabled-to-enabled upgrade path deferred to 4.23.
-  - *Sign-off:
+  - *Sign-off:* Martin Tessun (@mtessun) / 2026-04-30
 
 **Resource Constraints**
 
@@ -296,14 +296,14 @@ This section centralizes test scenarios for all participating SIGs. Each SIG's s
 - **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want alerting when golden image lacks architecture annotation.
   - *Test Scenario:* [Tier 2] Given multiarch support enabled, alert fired when golden image isn't annotated with architecture annotation.
   - *Priority:* P1
-- **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want alerting when golden images support is disabled on a multi-architecture cluster
-  - *Test Scenario:* [Tier 2] Disable golden images support on a multi-architecture cluster and verify an alert fires
+- **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want alerting when multiarch golden images support is disabled on a multi-architecture cluster
+  - *Test Scenario:* [Tier 2] Disable multiarch golden images support on a multi-architecture cluster and verify an alert fires
   - *Priority:* P1
 - **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want no alerting when restricting workloads placement to one architecture.
-  - *Test Scenario:* [Tier 2] Disable golden images support, set nodePlacement to a single architecture, and verify no misconfiguration alert fires
+  - *Test Scenario:* [Tier 2] Disable multiarch golden images support, set nodePlacement to a single architecture, and verify no misconfiguration alert fires
   - *Priority:* P1
-- **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want only base boot sources when disabling golden images support
-  - *Test Scenario:* [Tier 2] Disable golden images support, Verify only base boot sources exists.
+- **[CNV-67900](https://redhat.atlassian.net/browse/CNV-67900)** — As a cluster Admin, I want only base boot sources when disabling multiarch golden images support
+  - *Test Scenario:* [Tier 2] Disable multiarch golden images support, Verify only base boot sources exists.
   - *Priority:* P2
 
 #### sig-infra — New Functional Tests
